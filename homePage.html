@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    <link rel="stylesheet" type="text/css" href="mine.css">
+  
+</head>
+<body>
+    <h1>User Registration</h1>
+    <form id="registration-form" onsubmit="return validateForm()">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="numQuestions">Number of Questions:</label>
+        <input type="number" id="numQuestions" name="numQuestions" min="1" required><br><br>
+
+        <label for="difficulty">Difficulty:</label>
+        <select id="difficulty" name="difficulty" required>
+            <option value="">Select Difficulty</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select><br><br>
+
+        <label for="category">Category:</label>
+        <select id="category" name="Category" required>
+            <option value="">Select category</option>
+            <option value="9">General Knowledge</option>
+            <option value="10">Books</option>
+            <option value="22">Geography</option>
+            <option value="21">Sports</option>
+        </select><br><br>        
+
+        <input type="submit" value="Submit">
+    </form>
+
+    <script>
+        function validateForm() {
+            
+            const username = document.getElementById("username").value;
+            const email = document.getElementById("email").value;
+            const numQuestions = document.getElementById("numQuestions").value;
+            const difficulty = document.getElementById("difficulty").value;
+
+            // Simple validation
+            if (username === "" || email === "" || numQuestions === "" || difficulty === "") {
+                alert("All fields are required");
+                return false;
+            }
+            // Validate email format (you can use a more sophisticated email validation)
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email.match(emailRegex)) {
+                alert("Invalid email format");
+                return false;
+            }
+            // Validate number of questions (you can add more specific validation)
+            if (isNaN(numQuestions) || numQuestions <= 0) {
+                alert("Invalid number of questions");
+                return false;
+            }
+            // Validation passed
+            return true;
+        }
+
+        document.getElementById('registration-form')?.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            var numberOfQuestions = document.getElementById('numQuestions').value;
+            var level = document.querySelector('select[name="difficulty"]').value;
+            var questionCategory = document.querySelector('select[name="Category"]').value;
+
+            if (numberOfQuestions < 5) {
+                alert('Please select at least 5 questions.');
+                return; // Stop form submission
+            }
+
+            fetch('https://opentdb.com/api.php?amount=' + numberOfQuestions + '&category=' + questionCategory + '&difficulty=' + level + '&type=multiple')
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error(response.status);
+                    }
+                    console.log(response);
+                    return response.json();
+                })
+                .then(function(data) {
+                    // Redirect to the new page with questions
+                    window.location.href = 'quiz.html?questions=' + encodeURIComponent(JSON.stringify(data.results));
+                })
+                .catch(function(error) {
+                    displayError(error);
+                });
+        });
+        function showQuestions(questions) {
+
+console.log(questions); // Log the entire questions object
+const questionElement = document.getElementById('quiz-questions');
+questionElement.innerHTML = '';
+questions.results.forEach(function (question, index) {
+const questionText = question.question;
+const answerChoices = [question.correct_answer, ...question.incorrect_answers];
+
+ // Shuffle the answer choices to randomize their order
+     shuffleArray(answerChoices);
+// Create a new element for each question and append it to the container
+
+const questionDiv = document.createElement('div');
+questionDiv.innerHTML = '<p>Question ' + (index + 1) + ': ' + questionText + '</p>';
+
+    // Create a list of radio buttons for answer choices
+const choicesList = document.createElement('ul');
+answerChoices.forEach(function (choice, choiceIndex) {
+const choiceItem = document.createElement('li');
+const choiceInput = document.createElement('input');
+choiceInput.type = 'radio';
+choiceInput.name = 'question' + index; // Use a unique name for each question
+choiceInput.value = choice;
+choiceItem.appendChild(choiceInput);
+choiceItem.appendChild(document.createTextNode(choice));
+choicesList.appendChild(choiceItem);
+    });
+    questionDiv.appendChild(choicesList);
+    questionElement.appendChild(questionDiv);
+});
+}
+
+// Function to shuffle an array (used to randomize answer choices)
+function shuffleArray(array) {
+for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+}
+}
+function displayError(error) {
+            var questionElement = document.getElementById('error-block');
+            questionElement.innerHTML = '<p>Error: ' + error.message + '</p>';
+}
+       
+    </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Quiz Questions</title>
+    <link rel="stylesheet" type="text/css" href="mine.css">
+</head>
+<body>
+    
+
+    <h1>Quiz Questions</h1>
+    
+    <div id="quiz-container">
+        <div id="timer" >Time left: <span id="timer-countdown">20 seconds</span></div>
+        <div id="quiz-questions">
+            <!-- Questions will be displayed here -->
+            
+
+        </div>
+        <button id="submit-button" style="display:block;">Submit</button>
+    </div>
+
+    <button id="previous-button" disabled></button>
+    <button id="next-button" disabled></button> 
+  
+    <script>
+         var timer;
+        var timerCountdown = 20;
+
+        // Function to start the timer for the current question
+        function startTimer() {
+            clearInterval(timer); // Clear any previous timers
+            timerCountdown = 20; // Reset the timer to 20 seconds
+            timer = setInterval(updateTimer, 1000); // Call updateTimer every second
+            updateTimer(); // Call it immediately to display the initial value
+        }
+
+        function updateTimer() {
+            var timerElement = document.getElementById('timer-countdown');
+            timerElement.textContent = timerCountdown + ' seconds';
+
+            if (timerCountdown === 0) {
+                // Timer has expired, display the answer
+                displayAnswer();
+            } else {
+                timerCountdown--;
+            }
+        }
+
+        var questions = []; // Store the loaded questions
+        var currentQuestionIndex = 0;
+
+        // Add a listener to the "Next" button
+        document.getElementById('next-button').addEventListener('click', function() {
+            currentQuestionIndex++;
+            showCurrentQuestion();
+        });
+
+        // Add a listener to the "Previous" button
+        document.getElementById('previous-button').addEventListener('click', function() {
+            currentQuestionIndex--;
+            showCurrentQuestion();
+        });
+                        
+        // Add a listener to the "Submit" button
+       
+
+        function calculateScore() {
+            var score = 0;
+            questions.forEach(function (question) {
+                if (question.user_answer === question.correct_answer) {
+                    score++;
+                }
+            });
+            return score;
+        }
+
+        // Function to display the answer when the timer expires
+        
+        // Function to display the answer when the timer expires
+
+
+function showCurrentQuestion() {
+    var questionElement = document.getElementById('quiz-questions');
+    var currentQuestion = questions[currentQuestionIndex];
+
+    if (currentQuestion) {
+        questionElement.innerHTML = '<p>Question ' + (currentQuestionIndex + 1) + ': ' + currentQuestion.question + '</p>';
+
+        var answerChoices = [currentQuestion.correct_answer, ...currentQuestion.incorrect_answers];
+        shuffleArray(answerChoices);
+
+        answerChoices.forEach(function(choice) {
+            var choiceInput = document.createElement('input');
+            choiceInput.type = 'radio';
+            choiceInput.name = 'question' + currentQuestionIndex;
+            choiceInput.value = choice;
+            choiceInput.addEventListener('change', function() {
+                currentQuestion.user_answer = choice;
+
+                // Check if the selected answer is correct or incorrect
+                if (choice === currentQuestion.correct_answer) {
+                    choiceLabel.classList.add('correct-answer');
+                } else {
+                    choiceLabel.classList.add('incorrect-answer');
+                }
+
+                // Remove the color from other choices
+                answerChoices.forEach(function(otherChoice) {
+                    if (otherChoice !== choice) {
+                        var otherChoiceLabel = document.querySelector('label[for="' + otherChoice + '"]');
+                        if (otherChoiceLabel) {
+                            otherChoiceLabel.classList.remove('correct-answer', 'incorrect-answer');
+                        }
+                    }
+                });
+            });
+
+            var choiceLabel = document.createElement('label');
+            choiceLabel.appendChild(choiceInput);
+            choiceLabel.appendChild(document.createTextNode(choice));
+
+            questionElement.appendChild(choiceLabel);
+            startTimer();
+        });
+
+        // Enable or disable navigation buttons
+        document.getElementById('previous-button').disabled = currentQuestionIndex === 0;
+        document.getElementById('next-button').disabled = true;
+
+        // Show or hide the "Submit" button
+        if (currentQuestionIndex === questions.length - 1) {
+            document.getElementById('submit-button').style.display = 'block';
+        } else {
+            document.getElementById('submit-button').style.display = 'block';
+        }
+    }
+}
+
+
+// Add a listener to the "Submit" button
+// Add a listener to the "Submit" button
+document.getElementById('submit-button').addEventListener('click', function() {
+    if (currentQuestionIndex === questions.length - 1) {
+        // If it's the last question, calculate the score and display it
+        var userScore = calculateScore();
+        alert('Your score: ' + userScore);
+
+        // Clear the page and redirect to "new_trial.html"
+        document.body.innerHTML = '';
+        window.location.href = 'homePage.html';
+    } else {
+        // If it's not the last question, display the answer
+        displayAnswer();
+    }
+});
+
+
+
+
+
+        // Call this function when you have fetched questions from the API
+        function loadQuestions(apiQuestions) {
+            questions = apiQuestions;
+            currentQuestionIndex = 0;
+            showCurrentQuestion();
+        }
+        function startTimer() {
+    clearInterval(timer); // Clear any previous timers
+    timerCountdown = 20; // Reset the timer to 20 seconds
+    timer = setInterval(updateTimer, 1000); // Call updateTimer every second
+    updateTimer(); // Call it immediately to display the initial value
+}
+
+        // Function to shuffle an array (used to randomize answer choices)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Retrieve the questions from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const questionsParam = urlParams.get('questions');
+
+        if (questionsParam) {
+            const parsedQuestions = JSON.parse(decodeURIComponent(questionsParam));
+            loadQuestions(parsedQuestions);
+        }
+
+        
+
+        
+        // Function to display the answer when the timer expires or on "Submit"
+        
+        // Function to display the answer when the timer expires or on "Submit"
+
+
+// Function to display the answer when the timer expires or on "Submit"
+function displayAnswer() {
+    var currentQuestion = questions[currentQuestionIndex];
+    if (!currentQuestion.user_answer) {
+        // If no answer is selected, display the correct answer
+        alert('Time\'s up! The correct answer is: ' + currentQuestion.correct_answer);
+    } else if (currentQuestion.user_answer === currentQuestion.correct_answer) {
+        // If the selected answer is correct, display a message
+        alert('Correct! Your answer is right.');
+    } else {
+        // If the selected answer is incorrect, display a message along with the correct answer
+        alert('Incorrect! The correct answer is: ' + currentQuestion.correct_answer);
+    }
+
+    // Move to the next question
+    currentQuestionIndex++;
+    showCurrentQuestion();
+
+    // Enable the "Next" button
+    document.getElementById('next-button').disabled = true;
+}
+</script>
+</body>
+</html>
